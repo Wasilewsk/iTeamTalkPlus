@@ -42,9 +42,14 @@ jobs:
       - name: Extract TeamTalk SDK
         run: |
           7z x /tmp/tt5sdk.7z -o/tmp/tt5sdk -y > /dev/null
+          echo "SDK extraction contents:"
+          ls -la /tmp/tt5sdk/
+          echo "Looking for libTeamTalk5.a:"
           find /tmp/tt5sdk -name "libTeamTalk5.a"
           mkdir -p Library/TeamTalk_DLL
           cp $(find /tmp/tt5sdk -name "libTeamTalk5.a" | head -1) Library/TeamTalk_DLL/libTeamTalk5.a
+          echo "After copy:"
+          ls -la Library/TeamTalk_DLL/
 
       - name: Show build settings
         run: |
