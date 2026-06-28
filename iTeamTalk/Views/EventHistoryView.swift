@@ -6,11 +6,18 @@ struct EventHistoryView: View {
     var body: some View {
         List {
             if model.events.isEmpty {
-                ContentUnavailableView(
-                    "No Events",
-                    systemImage: "clock.arrow.circlepath",
-                    description: Text("Server events will appear here")
-                )
+                VStack(spacing: 8) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                    Text("No Events")
+                        .font(.title2)
+                    Text("Server events will appear here")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
             }
             ForEach(model.events.indices, id: \.self) { index in
                 let event = model.events[index]

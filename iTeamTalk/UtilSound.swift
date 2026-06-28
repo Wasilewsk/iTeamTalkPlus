@@ -152,9 +152,6 @@ func getCategory(_ opt: AVAudioSession.CategoryOptions) -> String {
     if opt.contains(.mixWithOthers) {
         str += "mixWithOthers|"
     }
-    if opt.contains(.allowBluetoothHFP) {
-        str += "allowBluetoothHFP|"
-    }
     if opt.contains(.duckOthers) {
         str += "duckOthers|"
     }
@@ -225,13 +222,7 @@ func setupSoundDevices() {
         if speaker {
             catoptions = [ .defaultToSpeaker ]
         } else {
-            catoptions = [ .allowBluetoothHFP, .allowAirPlay, .allowBluetoothA2DP ]
-            if #available(iOS 26.0, *) {
-                catoptions.update(with: .bluetoothHighQualityRecording)
-            }
-            if a2dp {
-                catoptions.remove(.allowBluetoothHFP)
-            }
+            catoptions = [ .allowAirPlay, .allowBluetoothA2DP ]
         }
         // headset notifications, UIApplication.shared.beginReceivingRemoteControlEvents(),
         // will be ignored with .mixWithOthers

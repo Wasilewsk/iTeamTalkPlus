@@ -34,7 +34,7 @@ struct ServerManagementView: View {
             StatRow(title: "Online Users", value: "\(model.serverStats.totalUsers)")
             StatRow(title: "Total Channels", value: "\(model.serverStats.totalChannels)")
             StatRow(title: "Uptime", value: model.serverStats.uptime)
-            StatRow(title: "Files", value: "\(model.serverStats.totalFiles)")
+            StatRow(title: "Files", value: "-")
         }
     }
 
@@ -87,7 +87,7 @@ struct ServerManagementView: View {
                     }
                     Spacer()
                     Button("Remove") {
-                        model.removeBan(banID: ban.id)
+                        model.removeBan(ipAddress: ban.ipAddress)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)

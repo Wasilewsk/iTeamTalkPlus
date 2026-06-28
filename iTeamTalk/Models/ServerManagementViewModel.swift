@@ -1,6 +1,12 @@
 import SwiftUI
 import TeamTalkKit
 
+fileprivate func ttStr<T>(_ value: T) -> String {
+    withUnsafePointer(to: value) {
+        String(cString: UnsafeRawPointer($0).assumingMemoryBound(to: CChar.self))
+    }
+}
+
 struct UserAccountEntry: Identifiable {
     let id: Int32
     let username: String
@@ -30,7 +36,9 @@ final class ServerManagementViewModel: ObservableObject, TeamTalkEvent {
     let title: String
 
     var isAdmin: Bool {
-        (TeamTalkClient.shared.myUserRights & USERRIGHT_ADMIN.rawValue) != 0
+        TeamTalkClient.shared.withUser(id: TeamTalkClient.shared.myUserID) { user in
+            (user.uUserType & USERTYPE_ADMIN.rawValue) != 0
+        }
     }
 
     private var listAccountsCmdID: INT32 = 0
@@ -114,7 +122,7 @@ final class ServerManagementViewModel: ObservableObject, TeamTalkEvent {
             }
             let entry = UserAccountEntry(
                 id: listAccountsCmdID,
-                username: String(cString: account.szUsername),
+                username: ttStr(account.szUsername),
                 userType: typeStr,
                 userRights: account.uUserRights
             )
@@ -146,9 +154,9 @@ final class ServerManagementViewModel: ObservableObject, TeamTalkEvent {
         case CLIENTEVENT_CMD_BANNEDUSER where collectingBans:
             let banned = TeamTalkMessagePayload.bannedUser(from: m)
             let entry = BanEntry(
-                id: String(cString: banned.szIPAddress),
-                ipAddress: String(cString: banned.szIPAddress),
-                username: String(cString: banned.szUsername)
+                id: ttStr(banned.szIPAddress),
+                ipAddress: ttStr(banned.szIPAddress),
+                username: ttStr(banned.szUsername)
             )
             accumulatedBans.append(entry)
 

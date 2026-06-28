@@ -1,4 +1,5 @@
 import SwiftUI
+import TeamTalkKit
 
 struct PrivateMessagesView: View {
     @ObservedObject var model: PrivateMessagesViewModel
@@ -16,11 +17,18 @@ struct PrivateMessagesView: View {
     private var sessionList: some View {
         List {
             if model.sessions.isEmpty {
-                ContentUnavailableView(
-                    "No Private Messages",
-                    systemImage: "message",
-                    description: Text("Private messages will appear here")
-                )
+                VStack(spacing: 8) {
+                    Image(systemName: "message")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                    Text("No Private Messages")
+                        .font(.title2)
+                    Text("Private messages will appear here")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
             }
             ForEach(model.sessions) { session in
                 HStack(spacing: 10) {
@@ -51,9 +59,9 @@ struct PrivateMessagesView: View {
             }
         }
         .navigationTitle(model.title)
-        .toolbar {
-            if model.selectedSession != nil {
-                ToolbarItem(placement: .navigationBarLeading) {
+        .toolbar(id: "pm") {
+            ToolbarItem(id: "back", placement: .navigationBarLeading) {
+                if model.selectedSession != nil {
                     Button("Back") {
                         model.selectedSession = nil
                     }
@@ -65,7 +73,7 @@ struct PrivateMessagesView: View {
 
 private struct PrivateChatDetailView: View {
     @ObservedObject var model: PrivateMessagesViewModel
-    let userID: INT32
+    let userID: Int32
     @State private var text = ""
     @FocusState private var isComposing: Bool
 

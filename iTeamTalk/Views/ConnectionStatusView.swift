@@ -1,4 +1,5 @@
 import SwiftUI
+import TeamTalkKit
 
 struct ConnectionStatusView: View {
     @ObservedObject var model: ConnectionStatusViewModel

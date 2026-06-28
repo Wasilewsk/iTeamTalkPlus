@@ -6,11 +6,18 @@ struct OnlineUsersView: View {
     var body: some View {
         List {
             if model.filteredUsers.isEmpty && !model.searchText.isEmpty {
-                ContentUnavailableView(
-                    "No Results",
-                    systemImage: "magnifyingglass",
-                    description: Text("No users match your search")
-                )
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                    Text("No Results")
+                        .font(.title2)
+                    Text("No users match your search")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
             }
 
             ForEach(model.filteredUsers) { entry in

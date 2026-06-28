@@ -1,6 +1,12 @@
 import SwiftUI
 import TeamTalkKit
 
+fileprivate func ttStr<T>(_ value: T) -> String {
+    withUnsafePointer(to: value) {
+        String(cString: UnsafeRawPointer($0).assumingMemoryBound(to: CChar.self))
+    }
+}
+
 struct FileEntry: Identifiable {
     let id: INT32
     let filename: String
@@ -46,9 +52,9 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
         files = fileList.map { file in
             FileEntry(
                 id: file.nFileID,
-                filename: String(cString: file.szFileName),
+                filename: ttStr(file.szFileName),
                 filesize: file.nFileSize,
-                username: String(cString: file.szUsername),
+                username: ttStr(file.szUsername),
                 remoteFileID: file.nFileID
             )
         }
@@ -102,9 +108,9 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
                 let progress = transfer.nFileSize > 0 ? Double(transfer.nTransferred) / Double(transfer.nFileSize) : 0
                 activeTransfers[idx] = FileTransferEntry(
                     id: Int(transfer.nTransferID),
-                    filename: String(cString: transfer.szRemoteFileName),
+                    filename: ttStr(transfer.szRemoteFileName),
                     progress: progress,
-                    isUpload: !transfer.bInbound
+                    isUpload: transfer.bInbound == 0
                 )
             }
             if transfer.nStatus == FILETRANSFER_FINISHED || transfer.nStatus == FILETRANSFER_ERROR {
