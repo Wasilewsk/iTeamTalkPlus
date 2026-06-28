@@ -70,7 +70,7 @@ class AppInfo {
     }
     
     static func getAppName() -> String {
-        return getBundleInfo(.name)
+        return "teamtalkpluss_for-ios"
     }
     static func getAppVersion() -> String {
         return getBundleInfo(.version_NO)
