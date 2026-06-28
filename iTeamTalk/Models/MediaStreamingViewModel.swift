@@ -48,16 +48,24 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
         refreshStreams()
     }
 
+    private var currentStreamingURL: URL?
+
     func startStreamingLocalFile(at url: URL) {
         guard url.startAccessingSecurityScopedResource() else { return }
-        defer { url.stopAccessingSecurityScopedResource() }
-        guard TeamTalkClient.shared.startStreamingMediaFileToChannel(filePath: url.path) else { return }
+        currentStreamingURL = url
+        guard TeamTalkClient.shared.startStreamingMediaFileToChannel(filePath: url.path) else {
+            url.stopAccessingSecurityScopedResource()
+            currentStreamingURL = nil
+            return
+        }
         isStreamingLocalFile = true
         refreshStreams()
     }
 
     func stopStreamingLocalFile() {
         TeamTalkClient.shared.stopStreamingMediaFileToChannel()
+        currentStreamingURL?.stopAccessingSecurityScopedResource()
+        currentStreamingURL = nil
         isStreamingLocalFile = false
         refreshStreams()
     }
@@ -113,6 +121,8 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
                 isStreamingLocalFile = info.nStatus == MFS_STARTED || info.nStatus == MFS_PLAYING || info.nStatus == MFS_PAUSED
                 if info.nStatus == MFS_FINISHED || info.nStatus == MFS_ERROR || info.nStatus == MFS_ABORTED || info.nStatus == MFS_CLOSED {
                     isStreamingLocalFile = false
+                    currentStreamingURL?.stopAccessingSecurityScopedResource()
+                    currentStreamingURL = nil
                 }
             }
             refreshStreams()

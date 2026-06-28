@@ -78,11 +78,23 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
             errorMessage = String(localized: "Not connected to a channel", comment: "files")
             return
         }
-        let fileID = TeamTalkClient.shared.doSendFile(channelID: myChannelID, localFilePath: url.path)
-        if fileID > 0 {
-            let entry = FileTransferEntry(id: Int(fileID), filename: url.lastPathComponent, progress: 0, isUpload: true)
-            activeTransfers.append(entry)
-        } else {
+        guard url.startAccessingSecurityScopedResource() else {
+            errorMessage = String(localized: "Cannot access file", comment: "files")
+            return
+        }
+        defer { url.stopAccessingSecurityScopedResource() }
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
+        do {
+            if FileManager.default.fileExists(atPath: tempURL.path) {
+                try FileManager.default.removeItem(at: tempURL)
+            }
+            try FileManager.default.copyItem(at: url, to: tempURL)
+        } catch {
+            errorMessage = String(localized: "Failed to access file", comment: "files")
+            return
+        }
+        let transferID = TeamTalkClient.shared.doSendFile(channelID: myChannelID, localFilePath: tempURL.path)
+        if transferID <= 0 {
             errorMessage = String(localized: "Failed to start upload", comment: "files")
         }
     }
@@ -93,10 +105,7 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let localPath = documentsPath.appendingPathComponent(file.filename).path
         let transferID = TeamTalkClient.shared.doRecvFile(channelID: myChannelID, fileID: file.remoteFileID, localFilePath: localPath)
-        if transferID > 0 {
-            let entry = FileTransferEntry(id: Int(transferID), filename: file.filename, progress: 0, isUpload: false)
-            activeTransfers.append(entry)
-        }
+        _ = transferID
     }
 
     func deleteFile(_ file: FileEntry) {
@@ -113,17 +122,27 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
             refreshFiles()
         case CLIENTEVENT_FILETRANSFER:
             let transfer = TeamTalkMessagePayload.fileTransfer(from: m)
-            if let idx = activeTransfers.firstIndex(where: { $0.id == Int(transfer.nTransferID) }) {
-                let progress = transfer.nFileSize > 0 ? Double(transfer.nTransferred) / Double(transfer.nFileSize) : 0
+            let transferID = Int(transfer.nTransferID)
+            let isUpload = transfer.bInbound == 0
+            let progress = transfer.nFileSize > 0 ? Double(transfer.nTransferred) / Double(transfer.nFileSize) : 0
+            let filename = fileTransferFileName(transfer)
+            if let idx = activeTransfers.firstIndex(where: { $0.id == transferID }) {
                 activeTransfers[idx] = FileTransferEntry(
-                    id: Int(transfer.nTransferID),
-                    filename: fileTransferFileName(transfer),
+                    id: transferID,
+                    filename: filename,
                     progress: progress,
-                    isUpload: transfer.bInbound == 0
+                    isUpload: isUpload
                 )
+            } else if transfer.nStatus != FILETRANSFER_FINISHED && transfer.nStatus != FILETRANSFER_ERROR {
+                activeTransfers.append(FileTransferEntry(
+                    id: transferID,
+                    filename: filename,
+                    progress: progress,
+                    isUpload: isUpload
+                ))
             }
             if transfer.nStatus == FILETRANSFER_FINISHED || transfer.nStatus == FILETRANSFER_ERROR {
-                activeTransfers.removeAll { $0.id == Int(transfer.nTransferID) }
+                activeTransfers.removeAll { $0.id == transferID }
                 refreshFiles()
             }
         default:
