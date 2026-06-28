@@ -427,6 +427,18 @@ public final class TeamTalkClient {
         return files
     }
 
+    // MARK: - Media File Streaming
+
+    @discardableResult
+    public func startStreamingMediaFileToChannel(filePath: String) -> Bool {
+        TT_StartStreamingMediaFileToChannel(instance, filePath, nil) != 0
+    }
+
+    @discardableResult
+    public func stopStreamingMediaFileToChannel() -> Bool {
+        TT_StopStreamingMediaFileToChannel(instance) != 0
+    }
+
     // MARK: - User Account Operations
 
     @discardableResult

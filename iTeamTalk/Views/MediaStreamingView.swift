@@ -1,16 +1,47 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct MediaStreamingView: View {
     @ObservedObject var model: MediaStreamingViewModel
+    @State private var showMediaPicker = false
 
     var body: some View {
         streamList
             .navigationTitle(model.title)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        if model.isStreamingLocalFile {
+                            Button(role: .destructive) {
+                                model.stopStreamingLocalFile()
+                            } label: {
+                                Image(systemName: "stop.circle.fill")
+                            }
+                            .accessibilityLabel("Stop streaming media file")
+                        }
+                        Button {
+                            showMediaPicker = true
+                        } label: {
+                            Image(systemName: "music.note.list")
+                        }
+                        .accessibilityLabel(model.isStreamingLocalFile ? "Change media file" : "Stream a media file")
+                    }
+                }
+            }
             .refreshable {
                 model.refreshStreams()
             }
             .onAppear {
                 model.refreshStreams()
+            }
+            .fileImporter(
+                isPresented: $showMediaPicker,
+                allowedContentTypes: [.audio, .movie, .video, .mpeg4Movie, .appleProtectedMPEG4Audio, .wav, .mp3],
+                allowsMultipleSelection: false
+            ) { result in
+                if case .success(let urls) = result, let url = urls.first {
+                    model.startStreamingLocalFile(at: url)
+                }
             }
     }
 
@@ -33,9 +64,13 @@ struct MediaStreamingView: View {
             Text("Active media streams will appear here")
                 .font(.body)
                 .foregroundStyle(.secondary)
+            Text("Use the toolbar button to stream a file")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
+        .accessibilityLabel("No active streams. Use the stream button in the toolbar to stream a media file.")
     }
 
     private var streamSections: some View {
@@ -60,6 +95,9 @@ struct MediaStreamingView: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.red)
+            .accessibilityLabel("Stop \(stream.streamType) for user \(stream.userID)")
         }
+        .accessibilityLabel("\(stream.streamType) stream for user \(stream.userID)")
+        .accessibilityAddTraits(.isButton)
     }
 }

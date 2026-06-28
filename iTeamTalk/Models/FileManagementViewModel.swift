@@ -1,14 +1,26 @@
 import SwiftUI
 import TeamTalkKit
 
-fileprivate func ttStr<T>(_ value: T) -> String {
-    withUnsafePointer(to: value) {
+func remoteFileName(_ file: RemoteFile) -> String {
+    withUnsafePointer(to: file.szFileName) {
+        String(cString: UnsafeRawPointer($0).assumingMemoryBound(to: CChar.self))
+    }
+}
+
+func remoteFileUsername(_ file: RemoteFile) -> String {
+    withUnsafePointer(to: file.szUsername) {
+        String(cString: UnsafeRawPointer($0).assumingMemoryBound(to: CChar.self))
+    }
+}
+
+func fileTransferFileName(_ transfer: FileTransfer) -> String {
+    withUnsafePointer(to: transfer.szRemoteFileName) {
         String(cString: UnsafeRawPointer($0).assumingMemoryBound(to: CChar.self))
     }
 }
 
 struct FileEntry: Identifiable {
-    let id: INT32
+    let id: Int
     let filename: String
     let filesize: Int64
     let username: String
@@ -47,14 +59,13 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
             files = []
             return
         }
-
         let fileList = TeamTalkClient.shared.getChannelFiles(channelID: myChannelID)
-        files = fileList.map { file in
+        files = fileList.enumerated().map { index, file in
             FileEntry(
-                id: file.nFileID,
-                filename: ttStr(file.szFileName),
+                id: index,
+                filename: remoteFileName(file),
                 filesize: file.nFileSize,
-                username: ttStr(file.szUsername),
+                username: remoteFileUsername(file),
                 remoteFileID: file.nFileID
             )
         }
@@ -67,21 +78,20 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
             errorMessage = String(localized: "Not connected to a channel", comment: "files")
             return
         }
-
         let fileID = TeamTalkClient.shared.doSendFile(channelID: myChannelID, localFilePath: url.path)
         if fileID > 0 {
             let entry = FileTransferEntry(id: Int(fileID), filename: url.lastPathComponent, progress: 0, isUpload: true)
             activeTransfers.append(entry)
+        } else {
+            errorMessage = String(localized: "Failed to start upload", comment: "files")
         }
     }
 
     func downloadFile(_ file: FileEntry) {
         let myChannelID = TeamTalkClient.shared.myChannelID
         guard myChannelID > 0 else { return }
-
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let localPath = documentsPath.appendingPathComponent(file.filename).path
-
         let transferID = TeamTalkClient.shared.doRecvFile(channelID: myChannelID, fileID: file.remoteFileID, localFilePath: localPath)
         if transferID > 0 {
             let entry = FileTransferEntry(id: Int(transferID), filename: file.filename, progress: 0, isUpload: false)
@@ -101,14 +111,13 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
         case CLIENTEVENT_CMD_FILE_NEW,
             CLIENTEVENT_CMD_FILE_REMOVE:
             refreshFiles()
-
         case CLIENTEVENT_FILETRANSFER:
             let transfer = TeamTalkMessagePayload.fileTransfer(from: m)
             if let idx = activeTransfers.firstIndex(where: { $0.id == Int(transfer.nTransferID) }) {
                 let progress = transfer.nFileSize > 0 ? Double(transfer.nTransferred) / Double(transfer.nFileSize) : 0
                 activeTransfers[idx] = FileTransferEntry(
                     id: Int(transfer.nTransferID),
-                    filename: ttStr(transfer.szRemoteFileName),
+                    filename: fileTransferFileName(transfer),
                     progress: progress,
                     isUpload: transfer.bInbound == 0
                 )
@@ -117,7 +126,6 @@ final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
                 activeTransfers.removeAll { $0.id == Int(transfer.nTransferID) }
                 refreshFiles()
             }
-
         default:
             break
         }

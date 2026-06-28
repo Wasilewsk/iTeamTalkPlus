@@ -20,6 +20,8 @@ struct FileManagementView: View {
                             ProgressView(value: transfer.progress)
                                 .tint(transfer.isUpload ? .orange : .blue)
                         }
+                        .accessibilityLabel(transfer.isUpload ? "Uploading \(transfer.filename)" : "Downloading \(transfer.filename)")
+                        .accessibilityValue("\(Int(transfer.progress * 100)) percent complete")
                     }
                 }
             }
@@ -28,6 +30,7 @@ struct FileManagementView: View {
                 if model.files.isEmpty {
                     Text("No files in this channel")
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("No files available")
                 }
                 ForEach(model.files) { file in
                     HStack {
@@ -46,13 +49,21 @@ struct FileManagementView: View {
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.small)
+                        .accessibilityLabel("Download \(file.filename)")
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        model.downloadFile(file)
+                    }
+                    .accessibilityLabel("\(file.filename), \(fileSizeString(file.filesize))")
+                    .accessibilityAddTraits(.isButton)
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             model.deleteFile(file)
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .accessibilityLabel("Delete \(file.filename)")
                     }
                 }
             }
@@ -65,6 +76,7 @@ struct FileManagementView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Upload file")
             }
         }
         .refreshable {
@@ -75,7 +87,7 @@ struct FileManagementView: View {
         }
         .fileImporter(
             isPresented: $showFilePicker,
-            allowedContentTypes: [.data],
+            allowedContentTypes: [.data, .image, .movie, .audio, .video, .pdf, .text],
             allowsMultipleSelection: false
         ) { result in
             if case .success(let urls) = result, let url = urls.first {

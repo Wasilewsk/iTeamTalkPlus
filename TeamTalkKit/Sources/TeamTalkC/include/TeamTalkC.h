@@ -53,6 +53,7 @@ FileTransfer TTKitMessageFileTransfer(const TTMessage* message);
 RemoteFile TTKitMessageRemoteFile(const TTMessage* message);
 BannedUser TTKitMessageBannedUser(const TTMessage* message);
 ServerStatistics TTKitMessageServerStatistics(const TTMessage* message);
+MediaFileInfo TTKitMessageMediaFileInfo(const TTMessage* message);
 TTBOOL TTKitMessageActiveFlag(const TTMessage* message);
 
 const TTCHAR* TTKitGetUserString(TTKitUserStringProperty property, const User* user);

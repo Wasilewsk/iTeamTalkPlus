@@ -16,6 +16,7 @@ struct MediaStreamEntry: Identifiable {
 
 final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
     @Published var streamGroups = [MediaStreamGroup]()
+    @Published var isStreamingLocalFile = false
 
     let title: String
 
@@ -44,6 +45,20 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
                 _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_MEDIAFILE.rawValue)
             }
         }
+        refreshStreams()
+    }
+
+    func startStreamingLocalFile(at url: URL) {
+        guard url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
+        guard TeamTalkClient.shared.startStreamingMediaFileToChannel(filePath: url.path) else { return }
+        isStreamingLocalFile = true
+        refreshStreams()
+    }
+
+    func stopStreamingLocalFile() {
+        TeamTalkClient.shared.stopStreamingMediaFileToChannel()
+        isStreamingLocalFile = false
         refreshStreams()
     }
 
@@ -90,6 +105,16 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
             CLIENTEVENT_CMD_USER_LEFT,
             CLIENTEVENT_CMD_USER_LOGGEDIN,
             CLIENTEVENT_CMD_USER_LOGGEDOUT:
+            refreshStreams()
+        case CLIENTEVENT_STREAM_MEDIAFILE,
+            CLIENTEVENT_LOCAL_MEDIAFILE:
+            if m.nClientEvent == CLIENTEVENT_LOCAL_MEDIAFILE {
+                let info = TeamTalkMessagePayload.mediaFileInfo(from: m)
+                isStreamingLocalFile = info.nStatus == MFS_STARTED || info.nStatus == MFS_PLAYING || info.nStatus == MFS_PAUSED
+                if info.nStatus == MFS_FINISHED || info.nStatus == MFS_ERROR || info.nStatus == MFS_ABORTED || info.nStatus == MFS_CLOSED {
+                    isStreamingLocalFile = false
+                }
+            }
             refreshStreams()
         default:
             break

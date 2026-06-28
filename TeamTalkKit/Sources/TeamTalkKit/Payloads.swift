@@ -142,6 +142,11 @@ public enum TeamTalkMessagePayload {
         return TTKitMessageServerStatistics(&message)
     }
 
+    public static func mediaFileInfo(from message: TTMessage) -> MediaFileInfo {
+        var message = message
+        return TTKitMessageMediaFileInfo(&message)
+    }
+
     public static func hasUserPayload(_ message: TTMessage) -> Bool {
         message.ttType == __USER
     }

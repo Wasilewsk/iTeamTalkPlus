@@ -153,6 +153,10 @@ ServerStatistics TTKitMessageServerStatistics(const TTMessage* message) {
     return message->serverstatistics;
 }
 
+MediaFileInfo TTKitMessageMediaFileInfo(const TTMessage* message) {
+    return message->mediafileinfo;
+}
+
 const TTCHAR* TTKitGetUserString(TTKitUserStringProperty property, const User* user) {
     switch (property) {
     case TTKitUserStringNickname:
