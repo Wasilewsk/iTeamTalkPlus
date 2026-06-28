@@ -808,7 +808,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					../Library/TeamTalk_DLL/,
+					"$(SRCROOT)/Library/TeamTalk_DLL/",
 				);
 				MARKETING_VERSION = 5.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bearware.iteamtalkplus;
@@ -840,7 +840,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					../Library/TeamTalk_DLL/,
+					"$(SRCROOT)/Library/TeamTalk_DLL/",
 				);
 				MARKETING_VERSION = 5.23;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bearware.iteamtalkplus;
