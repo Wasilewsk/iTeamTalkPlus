@@ -1,7 +1,7 @@
 iTeamTalk.xcodeproj/xcuserdata
 iTeamTalk.xcodeproj/project.xcworkspace/xcshareddata
 iTeamTalk.xcodeproj/project.xcworkspace/xcuserdata
-iTeamTalk/License.swift
+# iTeamTalk/License.swift is committed with placeholder values (override for production)
 /DerivedData
 Library/TeamTalk_DLL/libTeamTalk5.a
 *.ipa
