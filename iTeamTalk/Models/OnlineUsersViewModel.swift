@@ -15,7 +15,7 @@ struct OnlineUserEntry: Identifiable {
     let isMediaFileTx: Bool
 }
 
-final class OnlineUsersViewModel: ObservableObject {
+final class OnlineUsersViewModel: ObservableObject, TeamTalkEvent {
     @Published var users = [OnlineUserEntry]()
     @Published var searchText = ""
     @Published var selectedUserID: INT32?
@@ -40,7 +40,7 @@ final class OnlineUsersViewModel: ObservableObject {
     }
 
     func refreshUsers() {
-        let allUsers = TeamTalkClient.shared.getAllUsers()
+        let allUsers = TeamTalkClient.shared.getServerUsers()
         users = allUsers.map { user in
             let isFemale = (UInt(user.nStatusMode) & StatusMode.STATUSMODE_FEMALE.rawValue) != 0
             let statusModeStr: String
@@ -52,7 +52,9 @@ final class OnlineUsersViewModel: ObservableObject {
                 statusModeStr = isFemale ? String(localized: "Female", comment: "online users") : String(localized: "Available", comment: "online users")
             }
 
-            let channelName = TeamTalkClient.shared.withChannel(id: user.nChannelID) { TeamTalkString.channel(.name, from: $0) } ?? ""
+            let channelName = TeamTalkClient.shared.withChannel(id: user.nChannelID) {
+                TeamTalkString.channel(.name, from: $0)
+            }
             let isTalking = (user.uUserState & USERSTATE_VOICE.rawValue) != 0
             let isMuted = (user.uUserState & USERSTATE_MUTE_VOICE.rawValue) != 0
 
@@ -75,9 +77,7 @@ final class OnlineUsersViewModel: ObservableObject {
     func showUserDetail(userID: INT32) {
         selectedUserID = userID
     }
-}
 
-extension OnlineUsersViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_CMD_USER_LOGGEDIN,

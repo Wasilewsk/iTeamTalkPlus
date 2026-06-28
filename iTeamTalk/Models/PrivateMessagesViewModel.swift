@@ -8,7 +8,7 @@ struct PrivateChatSession: Identifiable {
     var unreadCount: Int
 }
 
-final class PrivateMessagesViewModel: ObservableObject {
+final class PrivateMessagesViewModel: ObservableObject, TeamTalkEvent {
     @Published var sessions = [PrivateChatSession]()
     @Published var selectedSession: INT32?
 
@@ -61,9 +61,7 @@ final class PrivateMessagesViewModel: ObservableObject {
             sessions.append(PrivateChatSession(id: userID, user: user, lastMessage: message, unreadCount: 0))
         }
     }
-}
 
-extension PrivateMessagesViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_CMD_USER_TEXTMSG:

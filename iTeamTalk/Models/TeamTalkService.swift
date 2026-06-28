@@ -1,12 +1,10 @@
 import Foundation
 import TeamTalkKit
 
-actor TeamTalkService {
+final class TeamTalkService {
     static let shared = TeamTalkService()
 
     private let client = TeamTalkClient.shared
-
-    // MARK: - Connection
 
     func connect(host: String, tcpPort: Int, udpPort: Int, encrypted: Bool) -> Bool {
         client.connect(toHost: host, tcpPort: INT32(tcpPort), udpPort: INT32(udpPort), encrypted: encrypted)
@@ -24,24 +22,19 @@ actor TeamTalkService {
     var isAuthorized: Bool { client.isAuthorized }
     var myUserID: INT32 { client.myUserID }
     var myChannelID: INT32 { client.myChannelID }
-    var myUserRights: UINT32 { client.myUserRights }
+    var myUserRights: UInt32 { client.myUserRights }
     var rootChannelID: INT32 { client.rootChannelID }
-    var serverIPAddress: String { client.serverIPAddress }
-    var pingTime: UInt32 { client.pingTime }
-    var statisticsReceivedBytes: Int64 { client.statisticsReceivedBytes }
-    var statisticsSentBytes: Int64 { client.statisticsSentBytes }
-    var statisticsReceiveKbps: Double { client.statisticsReceiveKbps }
-    var statisticsSendKbps: Double { client.statisticsSendKbps }
-    var serverProperties: ServerProperties { client.serverProperties }
 
-    // MARK: - Channels
-
-    func getChannel(id: INT32) -> Channel {
-        client.withChannel(id: id) { $0 } ?? Channel()
+    func withUser<T>(id userID: INT32, _ body: (inout User) -> T) -> T {
+        client.withUser(id: userID, body)
     }
 
-    func getAllChannels() -> [Channel] {
-        client.getAllChannels()
+    func withChannel<T>(id channelID: INT32, _ body: (inout Channel) -> T) -> T {
+        client.withChannel(id: channelID, body)
+    }
+
+    func withServerProperties<T>(_ body: (inout ServerProperties) -> T) -> T {
+        client.withServerProperties(body)
     }
 
     func channelID(fromPath path: String) -> INT32 {
@@ -56,35 +49,12 @@ actor TeamTalkService {
         client.join(channel: &channel)
     }
 
-    func leaveChannel() -> INT32 {
-        client.leaveChannel()
-    }
-
-    // MARK: - Users
-
-    func getAllUsers() -> [User] {
-        client.getAllUsers()
-    }
-
-    func getUser(id: INT32) -> User {
-        client.withUser(id: id) { $0 } ?? User()
-    }
-
-    func getDisplayName(for userID: INT32) -> String {
-        let user = getUser(id: userID)
-        return getDisplayName(user)
-    }
-
     func changeNickname(_ nickname: String) {
         client.changeNickname(nickname)
     }
 
-    func changeStatus(mode: INT32) {
-        client.changeStatus(mode: mode)
-    }
-
-    func changeStatusMessage(_ message: String) {
-        client.changeStatusMessage(message)
+    func changeStatus(mode: INT32, message: String = "") {
+        client.changeStatus(mode: mode, message: message)
     }
 
     func setUserMute(userID: INT32, stream: StreamType, muted: Bool) {
@@ -107,13 +77,9 @@ actor TeamTalkService {
         client.moveUser(id: userID, toChannelID: toChannelID)
     }
 
-    // MARK: - Messaging
-
     func sendTextMessage(_ msg: TextMessage, content: String) -> Bool {
         client.sendTextMessage(msg, content: content)
     }
-
-    // MARK: - Audio
 
     func enableVoiceTransmission(_ enable: Bool) {
         client.enableVoiceTransmission(enable)
@@ -121,11 +87,11 @@ actor TeamTalkService {
 
     var isVoiceTransmitting: Bool { client.isVoiceTransmitting }
 
-    func initSoundInputDevice(id: TeamTalkSoundDeviceID) -> Bool {
+    func initSoundInputDevice(id: INT32) -> Bool {
         client.initSoundInputDevice(id: id)
     }
 
-    func initSoundOutputDevice(id: TeamTalkSoundDeviceID) -> Bool {
+    func initSoundOutputDevice(id: INT32) -> Bool {
         client.initSoundOutputDevice(id: id)
     }
 
@@ -141,8 +107,8 @@ actor TeamTalkService {
         client.setSoundInputGainLevel(level)
     }
 
-    var soundOutputVolume: UInt32 { client.soundOutputVolume }
-    var soundInputGainLevel: UInt32 { client.soundInputGainLevel }
+    var soundOutputVolume: INT32 { client.soundOutputVolume }
+    var soundInputGainLevel: INT32 { client.soundInputGainLevel }
 
     func enableVoiceActivation(_ enable: Bool) {
         client.enableVoiceActivation(enable)
@@ -152,53 +118,11 @@ actor TeamTalkService {
         client.setVoiceActivationLevel(level)
     }
 
-    func setSoundInputPreprocess(_ preprocessor: inout TeamTalkAudioPreprocessor) {
-        client.setSoundInputPreprocess(&preprocessor)
-    }
-
-    // MARK: - Files
-
-    func getFiles(channelID: INT32) -> [RemoteFile] {
-        client.getFiles(channelID: channelID)
-    }
-
-    func uploadFile(channelID: INT32, localFilePath: String) -> INT32 {
-        client.uploadFile(channelID: channelID, localFilePath: localFilePath)
-    }
-
-    func downloadFile(channelID: INT32, remoteFileID: INT32, localFilePath: String) -> INT32 {
-        client.downloadFile(channelID: channelID, remoteFileID: remoteFileID, localFilePath: localFilePath)
-    }
-
-    func deleteFile(channelID: INT32, remoteFileID: INT32) {
-        client.deleteFile(channelID: channelID, remoteFileID: remoteFileID)
-    }
-
-    // MARK: - Admin
-
-    func getAllUserAccounts() -> [UserAccount] {
-        client.getAllUserAccounts()
-    }
-
-    func getAllBans() -> [Ban] {
-        client.getAllBans()
-    }
-
-    func removeBan(banID: INT32) {
-        client.removeBan(banID: banID)
-    }
-
-    func setServerProperties(_ props: ServerProperties) {
-        client.setServerProperties(props)
-    }
-
-    // MARK: - Subscriptions
-
-    func subscribe(userID: INT32, subscriptions: UINT32) {
+    func subscribe(userID: INT32, subscriptions: UInt32) {
         client.subscribe(userID: userID, subscriptions: subscriptions)
     }
 
-    func unsubscribe(userID: INT32, subscriptions: UINT32) {
+    func unsubscribe(userID: INT32, subscriptions: UInt32) {
         client.unsubscribe(userID: userID, subscriptions: subscriptions)
     }
 
@@ -206,15 +130,57 @@ actor TeamTalkService {
         client.isChannelOperator(channelID: channelID)
     }
 
-    // MARK: - Encryption
-
     func configureEncryption(_ config: TeamTalkEncryptionConfiguration) throws -> Bool {
         try client.configureEncryption(config)
     }
 
-    // MARK: - Streaming
+    // C API helpers
 
-    func stopStreaming(userID: INT32) {
-        client.stopStreaming(userID: userID)
+    func doSendFile(channelID: INT32, localFilePath: String) -> INT32 {
+        client.doSendFile(channelID: channelID, localFilePath: localFilePath)
+    }
+
+    func doRecvFile(channelID: INT32, fileID: INT32, localFilePath: String) -> INT32 {
+        client.doRecvFile(channelID: channelID, fileID: fileID, localFilePath: localFilePath)
+    }
+
+    func doDeleteFile(channelID: INT32, fileID: INT32) -> INT32 {
+        client.doDeleteFile(channelID: channelID, fileID: fileID)
+    }
+
+    func getChannelFiles(channelID: INT32) -> [RemoteFile] {
+        client.getChannelFiles(channelID: channelID)
+    }
+
+    func doListUserAccounts(index: INT32, count: INT32) -> INT32 {
+        client.doListUserAccounts(index: index, count: count)
+    }
+
+    func doNewUserAccount(_ account: UserAccount) -> INT32 {
+        client.doNewUserAccount(account)
+    }
+
+    func doDeleteUserAccount(username: String) -> INT32 {
+        client.doDeleteUserAccount(username: username)
+    }
+
+    func doListBans(channelID: INT32, index: INT32, count: INT32) -> INT32 {
+        client.doListBans(channelID: channelID, index: index, count: count)
+    }
+
+    func doUnBanUser(ipAddress: String, channelID: INT32) -> INT32 {
+        client.doUnBanUser(ipAddress: ipAddress, channelID: channelID)
+    }
+
+    func doQueryServerStats() -> INT32 {
+        client.doQueryServerStats()
+    }
+
+    func getServerChannels() -> [Channel] {
+        client.getServerChannels()
+    }
+
+    func getServerUsers() -> [User] {
+        client.getServerUsers()
     }
 }

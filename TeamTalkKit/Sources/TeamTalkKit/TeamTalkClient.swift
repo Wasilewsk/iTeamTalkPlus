@@ -110,6 +110,10 @@ public final class TeamTalkClient {
         TT_GetRootChannelID(instance)
     }
 
+    public var ttInstance: UnsafeMutableRawPointer? {
+        instance
+    }
+
     public var soundOutputVolume: Int32 {
         TT_GetSoundOutputVolume(instance)
     }
@@ -394,5 +398,89 @@ public final class TeamTalkClient {
 
     public func pump(_ event: ClientEvent, source: Int32) {
         TT_PumpMessage(instance, event, source)
+    }
+
+    // MARK: - File Operations
+
+    @discardableResult
+    public func doSendFile(channelID: Int32, localFilePath: String) -> Int32 {
+        TT_DoSendFile(instance, channelID, localFilePath)
+    }
+
+    @discardableResult
+    public func doRecvFile(channelID: Int32, fileID: Int32, localFilePath: String) -> Int32 {
+        TT_DoRecvFile(instance, channelID, fileID, localFilePath)
+    }
+
+    @discardableResult
+    public func doDeleteFile(channelID: Int32, fileID: Int32) -> Int32 {
+        TT_DoDeleteFile(instance, channelID, fileID)
+    }
+
+    public func getChannelFiles(channelID: Int32) -> [RemoteFile] {
+        var count: Int32 = 0
+        TT_GetChannelFiles(instance, channelID, nil, &count)
+        guard count > 0 else { return [] }
+        var files = [RemoteFile](repeating: RemoteFile(), count: Int(count))
+        var c = count
+        TT_GetChannelFiles(instance, channelID, &files, &c)
+        return files
+    }
+
+    // MARK: - User Account Operations
+
+    @discardableResult
+    public func doListUserAccounts(index: Int32, count: Int32) -> Int32 {
+        TT_DoListUserAccounts(instance, index, count)
+    }
+
+    @discardableResult
+    public func doNewUserAccount(_ account: UserAccount) -> Int32 {
+        var acc = account
+        return TT_DoNewUserAccount(instance, &acc)
+    }
+
+    @discardableResult
+    public func doDeleteUserAccount(username: String) -> Int32 {
+        TT_DoDeleteUserAccount(instance, username)
+    }
+
+    // MARK: - Ban Operations
+
+    @discardableResult
+    public func doListBans(channelID: Int32, index: Int32, count: Int32) -> Int32 {
+        TT_DoListBans(instance, channelID, index, count)
+    }
+
+    @discardableResult
+    public func doUnBanUser(ipAddress: String, channelID: Int32) -> Int32 {
+        TT_DoUnBanUser(instance, ipAddress, channelID)
+    }
+
+    // MARK: - Server Operations
+
+    @discardableResult
+    public func doQueryServerStats() -> Int32 {
+        TT_DoQueryServerStats(instance)
+    }
+
+    public func getServerChannels() -> [Channel] {
+        var count: Int32 = 0
+        TT_GetServerChannels(instance, nil, &count)
+        guard count > 0 else { return [] }
+        var channels = [Channel](repeating: Channel(), count: Int(count))
+        var c = count
+        TT_GetServerChannels(instance, &channels, &c)
+        return channels
+    }
+
+    public func getServerUsers() -> [User] {
+        var count: Int32 = 0
+        TT_GetServerUsers(instance, nil, &count)
+        guard count > 0 else { return [] }
+        var users = [User](repeating: User(), count: Int(count))
+        var c = count
+        TT_GetServerUsers(instance, &users, &c)
+        return users
     }
 }

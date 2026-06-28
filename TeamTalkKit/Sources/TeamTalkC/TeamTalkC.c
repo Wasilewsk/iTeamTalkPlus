@@ -137,6 +137,22 @@ TTBOOL TTKitMessageActiveFlag(const TTMessage* message) {
     return message->bActive;
 }
 
+FileTransfer TTKitMessageFileTransfer(const TTMessage* message) {
+    return message->filetransfer;
+}
+
+RemoteFile TTKitMessageRemoteFile(const TTMessage* message) {
+    return message->remotefile;
+}
+
+BannedUser TTKitMessageBannedUser(const TTMessage* message) {
+    return message->banneduser;
+}
+
+ServerStatistics TTKitMessageServerStatistics(const TTMessage* message) {
+    return message->serverstatistics;
+}
+
 const TTCHAR* TTKitGetUserString(TTKitUserStringProperty property, const User* user) {
     switch (property) {
     case TTKitUserStringNickname:

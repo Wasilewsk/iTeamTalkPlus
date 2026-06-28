@@ -23,7 +23,7 @@ enum UserStatusMode: Int, CaseIterable {
     }
 }
 
-final class ManageStatusViewModel: ObservableObject {
+final class ManageStatusViewModel: ObservableObject, TeamTalkEvent {
     @Published var selectedMode: UserStatusMode = .available
     @Published var statusMessage: String = ""
     @Published var isFemale: Bool = false
@@ -53,7 +53,6 @@ final class ManageStatusViewModel: ObservableObject {
         guard myID > 0 else { return }
 
         let user = TeamTalkClient.shared.withUser(id: myID) { $0 }
-        let modeRaw = UInt(user.nStatusMode) & StatusMode.STATUSMODE_MODE.rawValue
 
         if (UInt(user.nStatusMode) & StatusMode.STATUSMODE_AWAY.rawValue) != 0 {
             selectedMode = .away
@@ -74,14 +73,11 @@ final class ManageStatusViewModel: ObservableObject {
         if isFemale {
             mode |= StatusMode.STATUSMODE_FEMALE.rawValue
         }
-        TeamTalkClient.shared.changeStatus(mode: INT32(mode))
-        TeamTalkClient.shared.changeStatusMessage(statusMessage)
+        TeamTalkClient.shared.changeStatus(mode: INT32(mode), message: statusMessage)
 
         UserDefaults.standard.set(statusMessage, forKey: "user_status_message")
     }
-}
 
-extension ManageStatusViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_CMD_USER_UPDATE,

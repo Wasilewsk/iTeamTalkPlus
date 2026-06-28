@@ -1,7 +1,7 @@
 import SwiftUI
 import TeamTalkKit
 
-final class GlobalChatViewModel: ObservableObject {
+final class GlobalChatViewModel: ObservableObject, TeamTalkEvent {
     @Published var messages = [MyTextMessage]()
     @Published var composedText = ""
 
@@ -25,9 +25,11 @@ final class GlobalChatViewModel: ObservableObject {
         msg.nFromUserID = TeamTalkClient.shared.myUserID
         msg.nMsgType = MSGTYPE_BROADCAST
 
+        let user = TeamTalkClient.shared.withUser(id: msg.nFromUserID) { $0 }
+        let name = getDisplayName(user)
         let mymsg = MyTextMessage(
             fromuserid: msg.nFromUserID,
-            nickname: getDisplayName(TeamTalkClient.shared.withUser(id: msg.nFromUserID) { $0 }),
+            nickname: name,
             msgtype: .BCAST,
             content: content
         )
@@ -45,15 +47,11 @@ final class GlobalChatViewModel: ObservableObject {
         }
     }
 
-    // MARK: - TTS
-
     func speakLastMessage() {
         guard let msg = messages.last else { return }
         speakTextMessage(MSGTYPE_BROADCAST, mymsg: msg)
     }
-}
 
-extension GlobalChatViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_CMD_USER_TEXTMSG:
@@ -62,8 +60,7 @@ extension GlobalChatViewModel: TeamTalkEvent {
 
             let user = TeamTalkClient.shared.withUser(id: txtmsg.nFromUserID) { $0 }
             let name = getDisplayName(user)
-            let msgtype: MsgType = TeamTalkClient.shared.myUserID == txtmsg.nFromUserID ? .BCAST : .BCAST
-            let mymsg = MyTextMessage(fromuserid: txtmsg.nFromUserID, nickname: name, msgtype: msgtype, content: TeamTalkString.textMessage(txtmsg))
+            let mymsg = MyTextMessage(fromuserid: txtmsg.nFromUserID, nickname: name, msgtype: .BCAST, content: TeamTalkString.textMessage(txtmsg))
             messages.append(mymsg)
             trimMessages()
 

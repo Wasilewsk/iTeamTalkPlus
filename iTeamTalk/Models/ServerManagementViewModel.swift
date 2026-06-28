@@ -5,34 +5,41 @@ struct UserAccountEntry: Identifiable {
     let id: Int32
     let username: String
     let userType: String
-    let userRights: UINT32
+    let userRights: UInt32
 }
 
 struct BanEntry: Identifiable {
-    let id: Int
+    let id: String
     let ipAddress: String
     let username: String
 }
 
-struct ServerStatistics {
+struct ServerStatisticsEntry {
     var totalUsers: Int
     var totalChannels: Int
     var uptime: String
-    var totalFiles: Int
 }
 
-final class ServerManagementViewModel: ObservableObject {
+final class ServerManagementViewModel: ObservableObject, TeamTalkEvent {
     @Published var userAccounts = [UserAccountEntry]()
     @Published var banEntries = [BanEntry]()
-    @Published var serverStats = ServerStatistics(totalUsers: 0, totalChannels: 0, uptime: "0s", totalFiles: 0)
+    @Published var serverStats = ServerStatisticsEntry(totalUsers: 0, totalChannels: 0, uptime: "0s")
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     let title: String
+
     var isAdmin: Bool {
-        (TeamTalkClient.shared.myUserRights & USERRIGHT_ADMIN.rawValue) != 0 ||
-        (TeamTalkClient.shared.myUserRights & 0xFFFFFFFF) != 0
+        (TeamTalkClient.shared.myUserRights & USERRIGHT_ADMIN.rawValue) != 0
     }
+
+    private var listAccountsCmdID: INT32 = 0
+    private var listBansCmdID: INT32 = 0
+    private var accumulatedAccounts = [UserAccountEntry]()
+    private var accumulatedBans = [BanEntry]()
+    private var queryStatsCmdID: INT32 = 0
+    private var collectingBans = false
+    private var collectingAccounts = false
 
     init(title: String = String(localized: "Server Management", comment: "tab")) {
         self.title = title
@@ -50,9 +57,53 @@ final class ServerManagementViewModel: ObservableObject {
     }
 
     func refreshUserAccounts() {
+        guard isAdmin else { return }
         isLoading = true
-        let accounts = TeamTalkClient.shared.getAllUserAccounts()
-        userAccounts = accounts.map { account in
+        accumulatedAccounts.removeAll()
+        collectingAccounts = true
+        listAccountsCmdID = TeamTalkClient.shared.doListUserAccounts(index: 0, count: 0)
+    }
+
+    func refreshBanList() {
+        guard isAdmin else { return }
+        accumulatedBans.removeAll()
+        collectingBans = true
+        listBansCmdID = TeamTalkClient.shared.doListBans(channelID: 0, index: 0, count: 0)
+    }
+
+    func refreshServerProperties() {
+        let users = TeamTalkClient.shared.getServerUsers().count
+        let channels = TeamTalkClient.shared.getServerChannels().count
+        queryStatsCmdID = TeamTalkClient.shared.doQueryServerStats()
+
+        serverStats = ServerStatisticsEntry(
+            totalUsers: users,
+            totalChannels: channels,
+            uptime: serverStats.uptime
+        )
+    }
+
+    func kickUser(userID: INT32) {
+        TeamTalkClient.shared.kickUser(id: userID, fromChannelID: 0)
+    }
+
+    func banUser(userID: INT32) {
+        TeamTalkClient.shared.banUser(id: userID, fromChannelID: 0)
+        TeamTalkClient.shared.kickUser(id: userID, fromChannelID: 0)
+    }
+
+    func removeBan(ipAddress: String) {
+        TeamTalkClient.shared.doUnBanUser(ipAddress: ipAddress, channelID: 0)
+        refreshBanList()
+    }
+
+    func handleTTMessage(_ m: TTMessage) {
+        switch m.nClientEvent {
+        case CLIENTEVENT_CMD_SERVER_UPDATE:
+            refreshServerProperties()
+
+        case CLIENTEVENT_CMD_USERACCOUNT where collectingAccounts:
+            let account = TeamTalkMessagePayload.userAccount(from: m)
             let typeStr: String
             if (account.uUserType & USERTYPE_ADMIN.rawValue) != 0 {
                 typeStr = String(localized: "Admin", comment: "server mgmt")
@@ -61,70 +112,46 @@ final class ServerManagementViewModel: ObservableObject {
             } else {
                 typeStr = String(localized: "User", comment: "server mgmt")
             }
-            return UserAccountEntry(
-                id: account.nUserID,
-                username: TeamTalkString.userAccount(.username, from: account),
+            let entry = UserAccountEntry(
+                id: listAccountsCmdID,
+                username: String(cString: account.szUsername),
                 userType: typeStr,
                 userRights: account.uUserRights
             )
-        }
-        isLoading = false
-    }
+            accumulatedAccounts.append(entry)
 
-    func refreshBanList() {
-        let bans = TeamTalkClient.shared.getAllBans()
-        banEntries = bans.map { ban in
-            BanEntry(id: Int(ban.nBanID), ipAddress: TeamTalkString.ban(.ipAddress, from: ban), username: TeamTalkString.ban(.username, from: ban))
-        }
-    }
+        case CLIENTEVENT_CMD_SERVERSTATISTICS where m.nSource == queryStatsCmdID:
+            let stats = TeamTalkMessagePayload.serverStatistics(from: m)
+            let totalMSec = stats.nUptimeMSec
+            let totalSeconds = Int(totalMSec / 1000)
+            let hours = totalSeconds / 3600
+            let minutes = (totalSeconds % 3600) / 60
+            let seconds = totalSeconds % 60
+            serverStats = ServerStatisticsEntry(
+                totalUsers: serverStats.totalUsers,
+                totalChannels: serverStats.totalChannels,
+                uptime: String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+            )
 
-    func refreshServerProperties() {
-        let props = TeamTalkClient.shared.serverProperties
-        let users = TeamTalkClient.shared.getAllUsers().count
-        let channels = TeamTalkClient.shared.getAllChannels().count
-        let files = TeamTalkClient.shared.getAllFiles().count
+        case CLIENTEVENT_CMD_PROCESSING where !TeamTalkMessagePayload.isActive(m):
+            if m.nSource == listAccountsCmdID {
+                userAccounts = accumulatedAccounts
+                isLoading = false
+                collectingAccounts = false
+            } else if m.nSource == listBansCmdID {
+                banEntries = accumulatedBans
+                collectingBans = false
+            }
 
-        let uptimeSeconds = props.nTimeStarted > 0 ? Int(Date().timeIntervalSince1970) - Int(props.nTimeStarted) : 0
-        let hours = uptimeSeconds / 3600
-        let minutes = (uptimeSeconds % 3600) / 60
-        let seconds = uptimeSeconds % 60
+        case CLIENTEVENT_CMD_BANNEDUSER where collectingBans:
+            let banned = TeamTalkMessagePayload.bannedUser(from: m)
+            let entry = BanEntry(
+                id: String(cString: banned.szIPAddress),
+                ipAddress: String(cString: banned.szIPAddress),
+                username: String(cString: banned.szUsername)
+            )
+            accumulatedBans.append(entry)
 
-        serverStats = ServerStatistics(
-            totalUsers: users,
-            totalChannels: channels,
-            uptime: String(format: "%02d:%02d:%02d", hours, minutes, seconds),
-            totalFiles: files
-        )
-    }
-
-    func kickUser(userID: INT32) {
-        let cmdid = TeamTalkClient.shared.kickUser(id: userID, fromChannelID: 0)
-        _ = cmdid
-    }
-
-    func banUser(userID: INT32) {
-        let cmdid = TeamTalkClient.shared.banUser(id: userID, fromChannelID: 0)
-        _ = cmdid
-        TeamTalkClient.shared.kickUser(id: userID, fromChannelID: 0)
-    }
-
-    func removeBan(banID: Int) {
-        TeamTalkClient.shared.removeBan(banID: INT32(banID))
-        refreshBanList()
-    }
-
-    func saveServerProperties(_ props: ServerProperties) {
-        TeamTalkClient.shared.setServerProperties(props)
-    }
-}
-
-extension ServerManagementViewModel: TeamTalkEvent {
-    func handleTTMessage(_ m: TTMessage) {
-        switch m.nClientEvent {
-        case CLIENTEVENT_CMD_SERVER_UPDATE,
-            CLIENTEVENT_CMD_USER_LOGGEDIN,
-            CLIENTEVENT_CMD_USER_LOGGEDOUT:
-            refreshServerProperties()
         default:
             break
         }

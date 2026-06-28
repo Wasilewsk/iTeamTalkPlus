@@ -122,6 +122,26 @@ public enum TeamTalkMessagePayload {
         return TTKitMessageActiveFlag(&message) != 0
     }
 
+    public static func fileTransfer(from message: TTMessage) -> FileTransfer {
+        var message = message
+        return TTKitMessageFileTransfer(&message)
+    }
+
+    public static func remoteFile(from message: TTMessage) -> RemoteFile {
+        var message = message
+        return TTKitMessageRemoteFile(&message)
+    }
+
+    public static func bannedUser(from message: TTMessage) -> BannedUser {
+        var message = message
+        return TTKitMessageBannedUser(&message)
+    }
+
+    public static func serverStatistics(from message: TTMessage) -> ServerStatistics {
+        var message = message
+        return TTKitMessageServerStatistics(&message)
+    }
+
     public static func hasUserPayload(_ message: TTMessage) -> Bool {
         message.ttType == __USER
     }

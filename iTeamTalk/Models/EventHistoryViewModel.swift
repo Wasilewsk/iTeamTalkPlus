@@ -1,7 +1,7 @@
 import SwiftUI
 import TeamTalkKit
 
-final class EventHistoryViewModel: ObservableObject {
+final class EventHistoryViewModel: ObservableObject, TeamTalkEvent {
     @Published var events = [MyTextMessage]()
 
     let title: String
@@ -21,9 +21,7 @@ final class EventHistoryViewModel: ObservableObject {
             events.removeFirst()
         }
     }
-}
 
-extension EventHistoryViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_CMD_USER_LOGGEDIN:
@@ -39,9 +37,10 @@ extension EventHistoryViewModel: TeamTalkEvent {
         case CLIENTEVENT_CMD_USER_JOINED:
             let user = TeamTalkMessagePayload.user(from: m)
             let name = getDisplayName(user)
-            if let channel = TeamTalkClient.shared.withChannel(id: user.nChannelID, { TeamTalkString.channel(.name, from: $0) }) {
-                appendEvent(MyTextMessage(logmsg: String(format: String(localized: "%@ joined %@", comment: "event"), name, channel)))
+            let channel = TeamTalkClient.shared.withChannel(id: user.nChannelID) {
+                TeamTalkString.channel(.name, from: $0)
             }
+            appendEvent(MyTextMessage(logmsg: String(format: String(localized: "%@ joined %@", comment: "event"), name, channel)))
 
         case CLIENTEVENT_CMD_USER_LEFT:
             let user = TeamTalkMessagePayload.user(from: m)

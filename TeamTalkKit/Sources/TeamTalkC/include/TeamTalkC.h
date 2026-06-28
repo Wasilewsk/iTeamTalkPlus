@@ -49,6 +49,10 @@ ServerProperties TTKitMessageServerProperties(const TTMessage* message);
 UserAccount TTKitMessageUserAccount(const TTMessage* message);
 ClientErrorMsg TTKitMessageClientError(const TTMessage* message);
 TextMessage TTKitMessageTextMessage(const TTMessage* message);
+FileTransfer TTKitMessageFileTransfer(const TTMessage* message);
+RemoteFile TTKitMessageRemoteFile(const TTMessage* message);
+BannedUser TTKitMessageBannedUser(const TTMessage* message);
+ServerStatistics TTKitMessageServerStatistics(const TTMessage* message);
 TTBOOL TTKitMessageActiveFlag(const TTMessage* message);
 
 const TTCHAR* TTKitGetUserString(TTKitUserStringProperty property, const User* user);

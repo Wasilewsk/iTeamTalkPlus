@@ -14,7 +14,7 @@ struct MediaStreamEntry: Identifiable {
     let userID: INT32
 }
 
-final class MediaStreamingViewModel: ObservableObject {
+final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
     @Published var streamGroups = [MediaStreamGroup]()
 
     let title: String
@@ -32,7 +32,7 @@ final class MediaStreamingViewModel: ObservableObject {
         var byUser = [INT32: [MediaStreamEntry]]()
         var entryID = 0
 
-        let users = TeamTalkClient.shared.getAllUsers()
+        let users = TeamTalkClient.shared.getServerUsers()
         for user in users {
             var entries = [MediaStreamEntry]()
 
@@ -59,17 +59,11 @@ final class MediaStreamingViewModel: ObservableObject {
         }
 
         streamGroups = byUser.compactMap { userID, entries in
-            guard let user = TeamTalkClient.shared.withUser(id: userID, { $0 }) else { return nil }
+            let user = TeamTalkClient.shared.withUser(id: userID) { $0 }
             return MediaStreamGroup(id: Int(userID), username: getDisplayName(user), streams: entries)
         }
     }
 
-    func stopStream(for userID: INT32) {
-        TeamTalkClient.shared.stopStreaming(userID: userID)
-    }
-}
-
-extension MediaStreamingViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
         case CLIENTEVENT_USER_STATECHANGE,

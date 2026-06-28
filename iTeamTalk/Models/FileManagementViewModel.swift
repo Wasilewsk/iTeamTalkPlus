@@ -16,15 +16,13 @@ struct FileTransferEntry: Identifiable {
     let isUpload: Bool
 }
 
-final class FileManagementViewModel: ObservableObject {
+final class FileManagementViewModel: ObservableObject, TeamTalkEvent {
     @Published var files = [FileEntry]()
     @Published var activeTransfers = [FileTransferEntry]()
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     let title: String
-
-    private var transferIDCounter = 0
 
     init(title: String = String(localized: "Files", comment: "tab")) {
         self.title = title
@@ -44,13 +42,13 @@ final class FileManagementViewModel: ObservableObject {
             return
         }
 
-        let fileList = TeamTalkClient.shared.getFiles(channelID: myChannelID)
+        let fileList = TeamTalkClient.shared.getChannelFiles(channelID: myChannelID)
         files = fileList.map { file in
             FileEntry(
                 id: file.nFileID,
-                filename: TeamTalkString.file(.name, from: file),
+                filename: String(cString: file.szFileName),
                 filesize: file.nFileSize,
-                username: TeamTalkString.file(.username, from: file),
+                username: String(cString: file.szUsername),
                 remoteFileID: file.nFileID
             )
         }
@@ -64,11 +62,10 @@ final class FileManagementViewModel: ObservableObject {
             return
         }
 
-        let fileID = TeamTalkClient.shared.uploadFile(channelID: myChannelID, localFilePath: url.path)
+        let fileID = TeamTalkClient.shared.doSendFile(channelID: myChannelID, localFilePath: url.path)
         if fileID > 0 {
-            let entry = FileTransferEntry(id: transferIDCounter, filename: url.lastPathComponent, progress: 0, isUpload: true)
+            let entry = FileTransferEntry(id: Int(fileID), filename: url.lastPathComponent, progress: 0, isUpload: true)
             activeTransfers.append(entry)
-            transferIDCounter += 1
         }
     }
 
@@ -79,46 +76,41 @@ final class FileManagementViewModel: ObservableObject {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let localPath = documentsPath.appendingPathComponent(file.filename).path
 
-        let transferID = TeamTalkClient.shared.downloadFile(channelID: myChannelID, remoteFileID: file.remoteFileID, localFilePath: localPath)
+        let transferID = TeamTalkClient.shared.doRecvFile(channelID: myChannelID, fileID: file.remoteFileID, localFilePath: localPath)
         if transferID > 0 {
-            let entry = FileTransferEntry(id: transferIDCounter, filename: file.filename, progress: 0, isUpload: false)
+            let entry = FileTransferEntry(id: Int(transferID), filename: file.filename, progress: 0, isUpload: false)
             activeTransfers.append(entry)
-            transferIDCounter += 1
         }
     }
 
     func deleteFile(_ file: FileEntry) {
         let myChannelID = TeamTalkClient.shared.myChannelID
         guard myChannelID > 0 else { return }
-        TeamTalkClient.shared.deleteFile(channelID: myChannelID, remoteFileID: file.remoteFileID)
+        TeamTalkClient.shared.doDeleteFile(channelID: myChannelID, fileID: file.remoteFileID)
         refreshFiles()
     }
-}
 
-extension FileManagementViewModel: TeamTalkEvent {
     func handleTTMessage(_ m: TTMessage) {
         switch m.nClientEvent {
-        case CLIENTEVENT_CMD_FILES_NEW,
-            CLIENTEVENT_CMD_FILES_REMOVE,
-            CLIENTEVENT_CMD_FILES_UPDATE:
+        case CLIENTEVENT_CMD_FILE_NEW,
+            CLIENTEVENT_CMD_FILE_REMOVE:
             refreshFiles()
 
-        case CLIENTEVENT_FILE_TRANSFER:
-            let transfer = TeamTalkMessagePayload.transfer(from: m)
+        case CLIENTEVENT_FILETRANSFER:
+            let transfer = TeamTalkMessagePayload.fileTransfer(from: m)
             if let idx = activeTransfers.firstIndex(where: { $0.id == Int(transfer.nTransferID) }) {
-                let progress = transfer.nByteCount > 0 ? Double(transfer.nByteCount) / Double(transfer.nFileSize) : 0
+                let progress = transfer.nFileSize > 0 ? Double(transfer.nTransferred) / Double(transfer.nFileSize) : 0
                 activeTransfers[idx] = FileTransferEntry(
                     id: Int(transfer.nTransferID),
-                    filename: activeTransfers[idx].filename,
+                    filename: String(cString: transfer.szRemoteFileName),
                     progress: progress,
-                    isUpload: activeTransfers[idx].isUpload
+                    isUpload: !transfer.bInbound
                 )
             }
-
-        case CLIENTEVENT_FILE_TRANSFER_COMPLETE:
-            let transfer = TeamTalkMessagePayload.transfer(from: m)
-            activeTransfers.removeAll { $0.id == Int(transfer.nTransferID) }
-            refreshFiles()
+            if transfer.nStatus == FILETRANSFER_FINISHED || transfer.nStatus == FILETRANSFER_ERROR {
+                activeTransfers.removeAll { $0.id == Int(transfer.nTransferID) }
+                refreshFiles()
+            }
 
         default:
             break
