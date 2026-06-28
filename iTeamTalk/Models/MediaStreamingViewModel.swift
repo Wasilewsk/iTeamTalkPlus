@@ -32,16 +32,16 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
         let users = TeamTalkClient.shared.getServerUsers()
         if let user = users.first(where: { $0.nUserID == userID }) {
             if user.uUserState & USERSTATE_VOICE.rawValue != 0 {
-                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VOICE)
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VOICE.rawValue)
             }
             if user.uUserState & USERSTATE_VIDEOCAPTURE.rawValue != 0 {
-                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VIDEOCAPTURE)
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VIDEOCAPTURE.rawValue)
             }
             if user.uUserState & USERSTATE_DESKTOP.rawValue != 0 {
-                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_DESKTOP)
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_DESKTOP.rawValue)
             }
             if user.uUserState & USERSTATE_MEDIAFILE_AUDIO.rawValue != 0 || user.uUserState & USERSTATE_MEDIAFILE_VIDEO.rawValue != 0 {
-                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_MEDIAFILE)
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_MEDIAFILE.rawValue)
             }
         }
         refreshStreams()

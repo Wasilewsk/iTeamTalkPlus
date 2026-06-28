@@ -20,18 +20,6 @@ struct ConnectionStatusView: View {
                     Text(model.serverName)
                         .foregroundStyle(.secondary)
                 }
-                HStack {
-                    Text("Address")
-                    Spacer()
-                    Text(model.serverIP)
-                        .foregroundStyle(.secondary)
-                }
-                HStack {
-                    Text("Ping")
-                    Spacer()
-                    Text("\(model.pingMs) ms")
-                        .foregroundStyle(.secondary)
-                }
             } header: {
                 Text("Connection")
             }
@@ -57,23 +45,6 @@ struct ConnectionStatusView: View {
                 }
             } header: {
                 Text("My Info")
-            }
-
-            Section {
-                HStack {
-                    Text("Received")
-                    Spacer()
-                    Text("\(model.rxBytes) bytes (\(String(format: "%.1f", model.rxKbps)) Kbps)")
-                        .foregroundStyle(.secondary)
-                }
-                HStack {
-                    Text("Sent")
-                    Spacer()
-                    Text("\(model.txBytes) bytes (\(String(format: "%.1f", model.txKbps)) Kbps)")
-                        .foregroundStyle(.secondary)
-                }
-            } header: {
-                Text("Bandwidth")
             }
         }
         .navigationTitle(model.title)
