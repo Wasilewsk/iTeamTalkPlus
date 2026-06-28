@@ -22,18 +22,14 @@ env:
   APP_NAME: "iTeamTalkPlus"
   PROJECT_PATH: "iTeamTalk.xcodeproj"
   SCHEME: "iTeamTalk"
-  XCODE_VERSION: "15.0"
   SDK_DOWNLOAD_URL: "https://www.bearware.dk/teamtalksdk/v5.22a/tt5sdk_v5.22a_ios_universal.7z"
 
 jobs:
   build-ipa:
     name: Build IPA
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer
 
       - name: Install 7-Zip
         run: brew install sevenzip
