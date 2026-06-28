@@ -67,6 +67,26 @@
 		CC000500000000000000000E /* TextToSpeechEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000400000000000000000E /* TextToSpeechEventsView.swift */; };
 		CC000500000000000000000F /* UserDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000400000000000000000F /* UserDetailView.swift */; };
 		CC0005000000000000000010 /* WebLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000010 /* WebLoginView.swift */; };
+			CC000300000000000000000C /* GlobalChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000200000000000000000C /* GlobalChatViewModel.swift */; };
+			CC000300000000000000000D /* PrivateMessagesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000200000000000000000D /* PrivateMessagesViewModel.swift */; };
+			CC000300000000000000000E /* MediaStreamingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000200000000000000000E /* MediaStreamingViewModel.swift */; };
+			CC000300000000000000000F /* FileManagementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000200000000000000000F /* FileManagementViewModel.swift */; };
+			CC0003000000000000000010 /* ServerManagementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000010 /* ServerManagementViewModel.swift */; };
+			CC0003000000000000000011 /* EventHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000011 /* EventHistoryViewModel.swift */; };
+			CC0003000000000000000012 /* ConnectionStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000012 /* ConnectionStatusViewModel.swift */; };
+			CC0003000000000000000013 /* OnlineUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000013 /* OnlineUsersViewModel.swift */; };
+			CC0003000000000000000014 /* ManageStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000014 /* ManageStatusViewModel.swift */; };
+			CC0003000000000000000015 /* TeamTalkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0002000000000000000015 /* TeamTalkService.swift */; };
+			CC0005000000000000000011 /* GlobalChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000011 /* GlobalChatView.swift */; };
+			CC0005000000000000000012 /* PrivateMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000012 /* PrivateMessagesView.swift */; };
+			CC0005000000000000000013 /* MediaStreamingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000013 /* MediaStreamingView.swift */; };
+			CC0005000000000000000014 /* FileManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000014 /* FileManagementView.swift */; };
+			CC0005000000000000000015 /* ServerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000015 /* ServerManagementView.swift */; };
+			CC0005000000000000000016 /* EventHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000016 /* EventHistoryView.swift */; };
+			CC0005000000000000000017 /* ConnectionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000017 /* ConnectionStatusView.swift */; };
+			CC0005000000000000000018 /* OnlineUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000018 /* OnlineUsersView.swift */; };
+			CC0005000000000000000019 /* ManageStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0004000000000000000019 /* ManageStatusView.swift */; };
+			CC0007000000000000000001 /* TeamTalkPlusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0006000000000000000001 /* TeamTalkPlusTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -170,6 +190,26 @@
 		CC000400000000000000000E /* TextToSpeechEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextToSpeechEventsView.swift; sourceTree = "<group>"; };
 		CC000400000000000000000F /* UserDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDetailView.swift; sourceTree = "<group>"; };
 		CC0004000000000000000010 /* WebLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebLoginView.swift; sourceTree = "<group>"; };
+			CC000200000000000000000C /* GlobalChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalChatViewModel.swift; sourceTree = "<group>"; };
+			CC000200000000000000000D /* PrivateMessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateMessagesViewModel.swift; sourceTree = "<group>"; };
+			CC000200000000000000000E /* MediaStreamingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaStreamingViewModel.swift; sourceTree = "<group>"; };
+			CC000200000000000000000F /* FileManagementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagementViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000010 /* ServerManagementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManagementViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000011 /* EventHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHistoryViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000012 /* ConnectionStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStatusViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000013 /* OnlineUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineUsersViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000014 /* ManageStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageStatusViewModel.swift; sourceTree = "<group>"; };
+			CC0002000000000000000015 /* TeamTalkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamTalkService.swift; sourceTree = "<group>"; };
+			CC0004000000000000000011 /* GlobalChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalChatView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000012 /* PrivateMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateMessagesView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000013 /* MediaStreamingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaStreamingView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000014 /* FileManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagementView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000015 /* ServerManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManagementView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000016 /* EventHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHistoryView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000017 /* ConnectionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStatusView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000018 /* OnlineUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineUsersView.swift; sourceTree = "<group>"; };
+			CC0004000000000000000019 /* ManageStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageStatusView.swift; sourceTree = "<group>"; };
+			CC0006000000000000000001 /* TeamTalkPlusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamTalkPlusTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,6 +296,7 @@
 			isa = PBXGroup;
 			children = (
 				254B7A621B98BAA400BE0DEF /* iTeamTalkTests.swift */,
+				CC0006000000000000000001 /* TeamTalkPlusTests.swift */,
 				254B7A601B98BAA400BE0DEF /* Supporting Files */,
 			);
 			path = iTeamTalkTests;
@@ -311,6 +352,16 @@
 				CC0002000000000000000009 /* TextMessageModel.swift */,
 				CC000200000000000000000A /* UserDetailModel.swift */,
 				CC000200000000000000000B /* WebLoginModel.swift */,
+				CC000200000000000000000C /* GlobalChatViewModel.swift */,
+				CC000200000000000000000D /* PrivateMessagesViewModel.swift */,
+				CC000200000000000000000E /* MediaStreamingViewModel.swift */,
+				CC000200000000000000000F /* FileManagementViewModel.swift */,
+				CC0002000000000000000010 /* ServerManagementViewModel.swift */,
+				CC0002000000000000000011 /* EventHistoryViewModel.swift */,
+				CC0002000000000000000012 /* ConnectionStatusViewModel.swift */,
+				CC0002000000000000000013 /* OnlineUsersViewModel.swift */,
+				CC0002000000000000000014 /* ManageStatusViewModel.swift */,
+				CC0002000000000000000015 /* TeamTalkService.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -333,6 +384,15 @@
 				CC000400000000000000000E /* TextToSpeechEventsView.swift */,
 				CC000400000000000000000F /* UserDetailView.swift */,
 				CC0004000000000000000010 /* WebLoginView.swift */,
+				CC0004000000000000000011 /* GlobalChatView.swift */,
+				CC0004000000000000000012 /* PrivateMessagesView.swift */,
+				CC0004000000000000000013 /* MediaStreamingView.swift */,
+				CC0004000000000000000014 /* FileManagementView.swift */,
+				CC0004000000000000000015 /* ServerManagementView.swift */,
+				CC0004000000000000000016 /* EventHistoryView.swift */,
+				CC0004000000000000000017 /* ConnectionStatusView.swift */,
+				CC0004000000000000000018 /* OnlineUsersView.swift */,
+				CC0004000000000000000019 /* ManageStatusView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -521,6 +581,25 @@
 				CC000500000000000000000E /* TextToSpeechEventsView.swift in Sources */,
 				CC000500000000000000000F /* UserDetailView.swift in Sources */,
 				CC0005000000000000000010 /* WebLoginView.swift in Sources */,
+				CC000300000000000000000C /* GlobalChatViewModel.swift in Sources */,
+				CC000300000000000000000D /* PrivateMessagesViewModel.swift in Sources */,
+				CC000300000000000000000E /* MediaStreamingViewModel.swift in Sources */,
+				CC000300000000000000000F /* FileManagementViewModel.swift in Sources */,
+				CC0003000000000000000010 /* ServerManagementViewModel.swift in Sources */,
+				CC0003000000000000000011 /* EventHistoryViewModel.swift in Sources */,
+				CC0003000000000000000012 /* ConnectionStatusViewModel.swift in Sources */,
+				CC0003000000000000000013 /* OnlineUsersViewModel.swift in Sources */,
+				CC0003000000000000000014 /* ManageStatusViewModel.swift in Sources */,
+				CC0003000000000000000015 /* TeamTalkService.swift in Sources */,
+				CC0005000000000000000011 /* GlobalChatView.swift in Sources */,
+				CC0005000000000000000012 /* PrivateMessagesView.swift in Sources */,
+				CC0005000000000000000013 /* MediaStreamingView.swift in Sources */,
+				CC0005000000000000000014 /* FileManagementView.swift in Sources */,
+				CC0005000000000000000015 /* ServerManagementView.swift in Sources */,
+				CC0005000000000000000016 /* EventHistoryView.swift in Sources */,
+				CC0005000000000000000017 /* ConnectionStatusView.swift in Sources */,
+				CC0005000000000000000018 /* OnlineUsersView.swift in Sources */,
+				CC0005000000000000000019 /* ManageStatusView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -529,6 +608,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				254B7A631B98BAA400BE0DEF /* iTeamTalkTests.swift in Sources */,
+				CC0007000000000000000001 /* TeamTalkPlusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
