@@ -6,7 +6,7 @@ struct ConnectionStatusView: View {
 
     var body: some View {
         List {
-            Section("Connection") {
+            Section {
                 HStack {
                     Text("Status")
                     Spacer()
@@ -32,9 +32,11 @@ struct ConnectionStatusView: View {
                     Text("\(model.pingMs) ms")
                         .foregroundStyle(.secondary)
                 }
+            } header: {
+                Text("Connection")
             }
 
-            Section("My Info") {
+            Section {
                 HStack {
                     Text("User ID")
                     Spacer()
@@ -53,9 +55,11 @@ struct ConnectionStatusView: View {
                     Text(model.myChannel)
                         .foregroundStyle(.secondary)
                 }
+            } header: {
+                Text("My Info")
             }
 
-            Section("Bandwidth") {
+            Section {
                 HStack {
                     Text("Received")
                     Spacer()
@@ -68,6 +72,8 @@ struct ConnectionStatusView: View {
                     Text("\(model.txBytes) bytes (\(String(format: "%.1f", model.txKbps)) Kbps)")
                         .foregroundStyle(.secondary)
                 }
+            } header: {
+                Text("Bandwidth")
             }
         }
         .navigationTitle(model.title)

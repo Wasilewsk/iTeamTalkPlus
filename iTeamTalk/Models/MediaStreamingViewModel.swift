@@ -28,6 +28,25 @@ final class MediaStreamingViewModel: ObservableObject, TeamTalkEvent {
         removeAllTTMessageHandlers()
     }
 
+    func stopStream(for userID: INT32) {
+        let users = TeamTalkClient.shared.getServerUsers()
+        if let user = users.first(where: { $0.nUserID == userID }) {
+            if user.uUserState & USERSTATE_VOICE.rawValue != 0 {
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VOICE)
+            }
+            if user.uUserState & USERSTATE_VIDEOCAPTURE.rawValue != 0 {
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_VIDEOCAPTURE)
+            }
+            if user.uUserState & USERSTATE_DESKTOP.rawValue != 0 {
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_DESKTOP)
+            }
+            if user.uUserState & USERSTATE_MEDIAFILE_AUDIO.rawValue != 0 || user.uUserState & USERSTATE_MEDIAFILE_VIDEO.rawValue != 0 {
+                _ = TeamTalkClient.shared.unsubscribe(userID: userID, subscriptions: SUBSCRIBE_MEDIAFILE)
+            }
+        }
+        refreshStreams()
+    }
+
     func refreshStreams() {
         var byUser = [INT32: [MediaStreamEntry]]()
         var entryID = 0
